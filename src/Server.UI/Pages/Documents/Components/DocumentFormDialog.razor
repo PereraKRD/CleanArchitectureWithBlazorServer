@@ -1,10 +1,10 @@
-@using CleanArchitecture.Blazor.Application.Features.Documents.Commands.AddEdit
-
+﻿@using CleanArchitecture.Blazor.Application.Features.Documents.Commands.AddEdit
+@using CleanArchitecture.Blazor.Server.UI.Services.JsInterop
 @inherits MudComponentBase
 
 @inject IValidationService Validator
 @inject IStringLocalizer<Documents> L
-
+@inject IJSRuntime JS
 <MudDialog>
     <DialogContent>
         <MudForm Model="Model" @ref="_form" Validation="@(Validator.ValidateValue(Model))">
@@ -31,30 +31,34 @@
                 <MudItem xs="12">
                     <MudTextField Label="@L["Description"]"
                                   For="@(() => Model.Description)"
-                                  @bind-Value="Model.Description"></MudTextField>
+                                  @bind-Value="Model.Description">
+                    </MudTextField>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField Label="@L["Content"]"
                                   Lines="3" ReadOnly
                                   For="@(() => Model.Content)"
-                                  @bind-Value="Model.Content"></MudTextField>
+                                  @bind-Value="Model.Content">
+                    </MudTextField>
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                   <MudTextField Label="@L["Job Status"]"
-                                For="@(() => Model.Status)"
-                                @bind-Value="Model.Status"></MudTextField>
+                    <MudTextField Label="@L["Job Status"]"
+                                  For="@(() => Model.Status)"
+                                  @bind-Value="Model.Status">
+                    </MudTextField>
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                   <MudCheckBox Label="@L["Is Public"]"
-                                For="@(() => Model.IsPublic)"
-                                @bind-Checked="Model.IsPublic"></MudCheckBox>
+                    <MudCheckBox Label="@L["Is Public"]"
+                                 For="@(() => Model.IsPublic)"
+                                 @bind-Value="Model.IsPublic">
+                    </MudCheckBox>
                 </MudItem>
 
                 <MudItem>
                     <MudPaper Elevation="3">
-                        <div id="openseadragon" style="width: 600px; height: 300px;"></div>
+                        <div id="openseadragon" style="width: 680px; height: 300px;"></div>
                     </MudPaper>
-                   
+
                 </MudItem>
 
             </MudGrid>
@@ -62,20 +66,23 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">@ConstantString.Cancel</MudButton>
-        <MudButton Color="MudBlazor.Color.Primary" OnClick="Submit">@ConstantString.Ok</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">@ConstantString.Ok</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code{
-    [CascadingParameter]
-    private MudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = default!;
 
-    [EditorRequired][Parameter]
-    public AddEditDocumentCommand Model { get; set; } = default!;
+    [EditorRequired] [Parameter] public AddEditDocumentCommand Model { get; set; } = default!;
 
-    private MudForm? _form = default!;
+    private MudForm? _form;
 
     private const long MaxAllowedSize = 3145728;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Model.URL)) await new OpenSeadragon(JS).Open(Model.URL);
+    }
 
     private async Task Submit()
     {
@@ -84,8 +91,11 @@
         {
             MudDialog.Close(DialogResult.Ok(true));
         }
-
     }
 
-    private void Cancel() => MudDialog.Cancel();
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
 }

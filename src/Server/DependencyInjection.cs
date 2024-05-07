@@ -1,4 +1,4 @@
-using Blazor.Analytics;
+﻿using Blazor.Analytics;
 using CleanArchitecture.Blazor.Infrastructure.Configurations;
 using CleanArchitecture.Blazor.Infrastructure.Constants.Localization;
 using CleanArchitecture.Blazor.Server.Middlewares;
@@ -23,10 +23,10 @@ public static class DependencyInjection
             .AddLocalization(options => options.ResourcesPath = LocalizationConstants.ResourcesPath);
 
         services.AddHangfire(configuration => configuration
-            .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-            .UseSimpleAssemblyNameTypeSerializer()
-            .UseRecommendedSerializerSettings()
-            .UseInMemoryStorage())
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseInMemoryStorage())
             .AddHangfireServer()
             .AddMvc();
 
@@ -34,17 +34,15 @@ public static class DependencyInjection
 
         services.AddScoped<IApplicationHubWrapper, ServerHubWrapper>()
             .AddSignalR();
-
-        services.AddScoped<ExceptionHandlingMiddleware>()
-            .AddHealthChecks();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddProblemDetails();
+        services.AddHealthChecks();
 
         var privacySettings = config.GetRequiredSection(PrivacySettings.Key).Get<PrivacySettings>();
         if (privacySettings!.UseGoogleAnalytics)
         {
             if (privacySettings.GoogleAnalyticsKey is null or "")
-            {
                 throw new ArgumentNullException(nameof(privacySettings.GoogleAnalyticsKey));
-            }
 
             services.AddGoogleAnalytics(privacySettings.GoogleAnalyticsKey);
         }

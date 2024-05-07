@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace CleanArchitecture.Blazor.Server.UI.Services.Notifications;
@@ -19,27 +19,6 @@ public class InMemoryNotificationService : INotificationService
         _messages = new List<NotificationMessage>();
     }
 
-    private async Task<DateTime> GetLastReadTimestamp()
-    {
-        try
-        {
-            if ((await _localStorageService.GetAsync<DateTime>(LocalStorageKey)).Success == false)
-            {
-                return DateTime.MinValue;
-            }
-            else
-            {
-                var timestamp = await _localStorageService.GetAsync<DateTime>(LocalStorageKey);
-                return timestamp.Value;
-            }
-        }
-        catch (CryptographicException)
-        {
-            await _localStorageService.DeleteAsync(LocalStorageKey);
-            return DateTime.MinValue;
-        }
-    }
-
     public async Task<bool> AreNewNotificationsAvailable()
     {
         var timestamp = await GetLastReadTimestamp();
@@ -56,18 +35,16 @@ public class InMemoryNotificationService : INotificationService
     public async Task MarkNotificationsAsRead(string id)
     {
         var message = await GetMessageById(id);
-        if (message == null) { return; }
+        if (message == null) return;
 
         var timestamp = await _localStorageService.GetAsync<DateTime>(LocalStorageKey);
-        if (timestamp.Success)
-        {
-            await _localStorageService.SetAsync(LocalStorageKey, message.PublishDate);
-        }
-
+        if (timestamp.Success) await _localStorageService.SetAsync(LocalStorageKey, message.PublishDate);
     }
 
-    public Task<NotificationMessage> GetMessageById(string id) =>
-        Task.FromResult(_messages.First((x => x.Id == id)));
+    public Task<NotificationMessage> GetMessageById(string id)
+    {
+        return Task.FromResult(_messages.First(x => x.Id == id));
+    }
 
     public async Task<IDictionary<NotificationMessage, bool>> GetNotifications()
     {
@@ -82,20 +59,37 @@ public class InMemoryNotificationService : INotificationService
         return Task.CompletedTask;
     }
 
+    private async Task<DateTime> GetLastReadTimestamp()
+    {
+        try
+        {
+            if ((await _localStorageService.GetAsync<DateTime>(LocalStorageKey)).Success == false)
+                return DateTime.MinValue;
+
+            var timestamp = await _localStorageService.GetAsync<DateTime>(LocalStorageKey);
+            return timestamp.Value;
+        }
+        catch (CryptographicException)
+        {
+            await _localStorageService.DeleteAsync(LocalStorageKey);
+            return DateTime.MinValue;
+        }
+    }
+
 
     public void Preload()
     {
         _messages.Add(new NotificationMessage(
-            "mudblazor-here-to-stay",
-            "MudBlazor is here to stay",
+            "readme",
+            "Blazor Application is ready",
             "We are paving the way for the future of Blazor",
             "Announcement",
             new DateTime(2022, 01, 13),
-            "_content/MudBlazor.Docs/images/announcements/mudblazor_heretostay.png",
+            "https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/dotnet.yml/badge.svg",
             new[]
             {
-                new NotificationAuthor("Jonny Larsson",
-                    "https://avatars.githubusercontent.com/u/10367109?v=4")
+                new NotificationAuthor("Hualin",
+                    "https://avatars.githubusercontent.com/u/1549611?s=48&v=4")
             }, typeof(NotificationMessage)));
     }
 }

@@ -1,6 +1,4 @@
-@using CleanArchitecture.Blazor.Server.UI.Models.Identity;
-    using CleanArchitecture.Blazor.Server.UI.Pages._Models.Identity
-@inherits MudComponentBase
+﻿@inherits MudComponentBase
 
 @inject IStringLocalizer<Roles> L
 
@@ -29,10 +27,10 @@
                     <CardHeaderContent>
                         <MudStack Spacing="1">
                             <MudText Typo="Typo.body1">
-                                @group
+                                @L[group]
                             </MudText>
                             <MudText Typo="Typo.body2">
-                                @(Permissions.FirstOrDefault(x => x.Group == group)?.Description)
+                                @(L[Permissions.First(x => x.Group == group).Description])
                             </MudText>
                         </MudStack>
                     </CardHeaderContent>
@@ -51,9 +49,9 @@
                             <MudCheckBox Dense="true"
                                          T="bool"
                                          Size="Size.Small"
-                                         Checked="@Permissions[x].Assigned"
-                                         Label="@Permissions[x].ClaimValue"
-                                         CheckedChanged="@(s => OnAssignChanged.InvokeAsync(Permissions[x]))"
+                                         Value="@Permissions[x].Assigned"
+                                         Label="@L[Permissions[x].ClaimValue]"
+                                         ValueChanged="@(s => OnAssignChanged.InvokeAsync(Permissions[x]))"
                                          Color="Color.Primary">
                             </MudCheckBox>
                         }
@@ -70,23 +68,17 @@
 </MudDrawer>
 
 @code{
-    [EditorRequired][Parameter]
-    public List<PermissionModel> Permissions { get; set; } = new()!;
+    [EditorRequired] [Parameter] public List<PermissionModel> Permissions { get; set; } = new()!;
 
-    [EditorRequired][Parameter]
-    public bool Open { get; set; } = default!;
+    [EditorRequired] [Parameter] public bool Open { get; set; } = default!;
 
-    [EditorRequired][Parameter]
-    public EventCallback<PermissionModel> OnAssignChanged { get; set; }
+    [EditorRequired] [Parameter] public EventCallback<PermissionModel> OnAssignChanged { get; set; }
 
-    [EditorRequired][Parameter]
-    public EventCallback<List<PermissionModel>> OnAssignAllChanged { get; set; }
+    [EditorRequired] [Parameter] public EventCallback<List<PermissionModel>> OnAssignAllChanged { get; set; }
 
-    [EditorRequired][Parameter]
-    public EventCallback<bool> OnOpenChanged { get; set; }
+    [EditorRequired] [Parameter] public EventCallback<bool> OnOpenChanged { get; set; }
 
-    [Parameter]
-    public bool Waiting { get; set; }
+    [Parameter] public bool Waiting { get; set; }
 
     private string Keyword { get; set; } = string.Empty;
 
@@ -98,6 +90,8 @@
             t.Assigned = !t.Assigned;
             list.Add(t);
         }
+
         await OnAssignAllChanged.InvokeAsync(list);
     }
+
 }

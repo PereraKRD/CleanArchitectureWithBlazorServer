@@ -1,12 +1,12 @@
-@inject LayoutService LayoutService
-
+﻿@inject LayoutService LayoutService
+@inject IStringLocalizer<ThemesMenu> L
 <div class="px-4 py-2 theme-button"
      @onclick="OnClick">
     <MudTooltip Arrow="true"
                 Placement="Placement.Left"
-                Text="Themes">
+                Text="@L["Themes"]">
         <MudIcon Icon="@Icons.Material.Filled.Brush"
-                 Style="color: #05192d" />
+                 Style="color: #05192d"/>
     </MudTooltip>
 </div>
 
@@ -27,11 +27,9 @@
             border-bottom-right-radius: 24px !important;
         }
     </style>
-    
 }
 else
 {
- 
     <style>
         .theme-button {
             position: fixed;
@@ -47,7 +45,6 @@ else
             
         }
     </style>
-
 }
 
 @code
